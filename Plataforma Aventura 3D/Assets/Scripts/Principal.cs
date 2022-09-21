@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-public class Principal : MonoBehaviour {
 
+public class Principal : MonoBehaviour 
+{
 	int _ovos;
 	int _penas = 4;
 	int _vidas;
@@ -22,11 +23,18 @@ public class Principal : MonoBehaviour {
 
 	public GameObject cameraIntro;
 	public GameObject cameraJogador;
-	//public GameObject cameraEstrela;
+	public GameObject cameraEstrela;
 
+	public AudioClip somOvo;
+	public AudioClip somPena;
+	public AudioClip somEstrela;
+	public AudioClip somHit;
+	public AudioClip somWin;
+	public AudioClip somLose;
+	public AudioClip somApareceStar;
 
-	void Start(){
-
+	void Start()
+	{
 		jogador = GameObject.Find("Jogador");
         // para usar em qualquer resoluçao de tela
         //largura dele /2 +10 no eixo X  ~~  altura da tela - ~largura dele/2 -10
@@ -40,11 +48,13 @@ public class Principal : MonoBehaviour {
 
 		imagemVidas.GetComponent<Image>().sprite = iconesHudVida[_penas]; // vai pegar os sprites da viada e começa no 4 pois pena=4
 
-		//cameraEstrela.SetActive(false);
+		cameraEstrela.SetActive(false);
 		cameraIntro.SetActive(true);
 		cameraJogador.SetActive(true);
 	}
-	public void PegaOvo(){
+
+	public void PegaOvo()
+	{
 		_ovos--;
 		if(_ovos<=0) // se for menor q 0
 		{
@@ -52,52 +62,77 @@ public class Principal : MonoBehaviour {
 			PegouTodosOvos();
 		}
 		textoOvos.text = _ovos.ToString();
+		GetComponent<AudioSource>().PlayOneShot(somOvo, 0.7f);
 	}
-	public void PegaPena(){
+	public void PegaPena()
+	{
 		_penas++;
 		if (_penas>8){_penas=8;} // se tiver mais q 8 enas = 8 
 		imagemVidas.GetComponent<Image>().sprite = iconesHudVida[_penas];
+		GetComponent<AudioSource>().PlayOneShot(somPena, 0.7f);
 	}
 
-	public void PerdePena(){ // se recebe o dano
+	public void PerdePena()// se recebe o dano
+	{ 
 		_penas--;
 		if (_penas<=0){_penas=0; PerdeJogo();}
 		imagemVidas.GetComponent<Image>().sprite = iconesHudVida[_penas];
+		GetComponent<AudioSource>().PlayOneShot(somHit, 0.7f);
 	}
 
-	public void PegaEstrela(){Invoke("RecarregaCena", 2f);} // se pega a estrela
+	public void PegaEstrela()
+	{
+		GetComponent<AudioSource>().PlayOneShot(somEstrela, 0.7f);
+		Invoke("GanhaJogo", 0.1f);
+		Invoke("RecarregaCena", 2.5f);
+	} // se pega a estrela
 
-	void PegouTodosOvos(){
-		//cameraEstrela.SetActive(true);
+	void PegouTodosOvos()
+	{
+		cameraEstrela.SetActive(true);
+		GetComponent<AudioSource>().PlayOneShot(somApareceStar, 0.7f);
 		cameraIntro.SetActive(false);
 		cameraJogador.SetActive(false);
 		Invoke("SomeVidro", 1.5f); // para sumir com o vidro
 	}
-	void GanhaJogo(){}
-	void PerdeJogo(){ Invoke("RecarregaCena", 2f); }
 
-	void SomeVidro(){
-		objetoVidro.SetActive(false);
-		Invoke("VoltaCamera", 1.5f);
-
+	void GanhaJogo()
+	{
+		GetComponent<AudioSource>().PlayOneShot(somWin, 0.7f);
 	}
 
-	void VoltaCamera(){
-		//cameraEstrela.SetActive(false);
+	void PerdeJogo()
+	{
+		GetComponent<AudioSource>().PlayOneShot(somLose, 0.7f);
+		Invoke("RecarregaCena", 2f);
+	}
+
+	void SomeVidro()
+	{
+		objetoVidro.SetActive(false);
+		Invoke("VoltaCamera", 1.5f);
+	}
+
+	void VoltaCamera()
+	{
+		cameraEstrela.SetActive(false);
 		cameraIntro.SetActive(false);
 		cameraJogador.SetActive(true);
 	}
 
-	public void CaiuNoBuraco(){ // se cai
+	public void CaiuNoBuraco() // se cai
+	{ 
+		GetComponent<AudioSource>().PlayOneShot(somLose, 0.7f);
 		Invoke("RecarregaCena", 2f);
-
 	}
-	public void RecarregaCena(){//recarrega a cena
+
+	public void RecarregaCena()//recarrega a cena
+	{
 		Application.LoadLevel("Felpudo3DAdventure");
-
 	}
 
-	void EfeitoDePancada(){ //quando se colide com o fogo
+	void EfeitoDePancada()//quando se colide com o fogo
+	{ 
 		PerdePena();
 		InvokeRepeating("PiscaFelpudo",0,0.15f);
 		jogador.GetComponent<CharacterController>().Move(jogador.transform.TransformDirection(Vector3.back));
